@@ -1,74 +1,73 @@
-# Cloudflare Pages Deployment
+# Arcforge Cloudflare Pages Full Stack 部署说明
 
-This project has been prepared for Cloudflare Pages so it can use a free `*.pages.dev` URL.
+这个版本是完整 Pages Full Stack：
 
-## Cloudflare resources
+- 前端：Cloudflare Pages 静态资源，输出目录 `dist`
+- 后端：Cloudflare Pages Functions，目录 `functions/`
+- 数据库：Cloudflare D1，绑定名必须是 `DB`
+- 媒体：Cloudflare R2，绑定名必须是 `MEDIA`
 
-- D1 database name: `arcforge-database`
-- D1 binding name: `DB`
-- D1 database ID: `dcc74346-0345-4c64-a790-556dcc38840b`
-- R2 bucket name: `arcforge-media`
-- R2 binding name: `MEDIA`
+## Cloudflare Pages 设置
 
-## Pages build settings
+Build command:
 
-Create a new Cloudflare Pages project from GitHub.
-
-Use these settings:
-
-```txt
-Framework preset: None
-Build command: npm install && npm run pages:build
-Build output directory: pages-dist
-Root directory: leave blank
-Node.js version: 22
+```bash
+npm ci && npm run pages:build
 ```
 
-Do not use `npx wrangler deploy` as the deploy command for Pages. That command creates a Workers URL.
+Build output directory:
 
-## Pages bindings
+```text
+dist
+```
 
-In the Pages project settings, add these bindings for both Production and Preview if available:
+Root directory: 留空
 
-```txt
+Node.js version: 22
+
+Compatibility flags: 如果页面要求，添加：
+
+```text
+nodejs_compat
+```
+
+## Bindings
+
+在 Pages 项目 Settings -> Functions -> Bindings 中添加：
+
+```text
 D1 database binding
 Variable name: DB
 Database: arcforge-database
 ```
 
-```txt
+```text
 R2 bucket binding
 Variable name: MEDIA
 Bucket: arcforge-media
 ```
 
-Also set compatibility:
+## 初始化 D1
 
-```txt
-Compatibility date: 2026-05-15 or newer
-Compatibility flags: nodejs_compat
+进入 D1 数据库 `arcforge-database` 的 Console，执行：
+
+```text
+drizze/0000_groovy_mongu.sql
 ```
 
-## Database initialization
+注意：文件路径实际是：
 
-Run the SQL in:
-
-```txt
+```text
 drizzle/0000_groovy_mongu.sql
 ```
 
-Cloudflare path:
+执行后后台新增商品和订单功能才会正常写入数据库。
 
-```txt
-Storage & databases -> D1 SQLite Database -> arcforge-database -> Console
-```
+## 页面
 
-## Free URL
-
-If the Pages project name is `arcforge`, the free URL will be:
-
-```txt
-https://arcforge.pages.dev
-```
-
-`https://arcforge.dev` is only possible if you buy and bind the custom domain `arcforge.dev`.
+- 首页：`/`
+- 管理：`/admin.html`
+- 支付/下单：`/checkout.html`
+- 产品 API：`/api/products`
+- 媒体上传 API：`/api/upload`
+- R2 媒体访问：`/media/<storage_key>`
