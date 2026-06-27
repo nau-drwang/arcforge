@@ -1,0 +1,203 @@
+{
+  "generated_from": "Image_20260622212428_43_83.zip",
+  "assets": [
+    {
+      "source": "Image_20260622204510_1_83.jpg",
+      "artwork_slug": "inferno-duel",
+      "view": "hero",
+      "path": "/assets/images/artworks/inferno-duel/inferno-duel-hero.webp",
+      "thumb": "/assets/images/artworks/inferno-duel/inferno-duel-hero-thumb.webp",
+      "width": 1800,
+      "height": 1200,
+      "original_width": 8064,
+      "original_height": 5377
+    },
+    {
+      "source": "Image_20260622204512_2_83.jpg",
+      "artwork_slug": "inferno-duel",
+      "view": "wide-angle",
+      "path": "/assets/images/artworks/inferno-duel/inferno-duel-wide-angle.webp",
+      "thumb": "/assets/images/artworks/inferno-duel/inferno-duel-wide-angle-thumb.webp",
+      "width": 1800,
+      "height": 1200,
+      "original_width": 8064,
+      "original_height": 5377
+    },
+    {
+      "source": "Image_20260622204514_4_83.jpg",
+      "artwork_slug": "inferno-duel",
+      "view": "vertical-action",
+      "path": "/assets/images/artworks/inferno-duel/inferno-duel-vertical-action.webp",
+      "thumb": "/assets/images/artworks/inferno-duel/inferno-duel-vertical-action-thumb.webp",
+      "width": 1800,
+      "height": 1200,
+      "original_width": 8064,
+      "original_height": 5377
+    },
+    {
+      "source": "Image_20260622204516_5_83.jpg",
+      "artwork_slug": "inferno-duel",
+      "view": "front",
+      "path": "/assets/images/artworks/inferno-duel/inferno-duel-front.webp",
+      "thumb": "/assets/images/artworks/inferno-duel/inferno-duel-front-thumb.webp",
+      "width": 1800,
+      "height": 1200,
+      "original_width": 8064,
+      "original_height": 5377
+    },
+    {
+      "source": "Image_20260622204520_8_83.jpg",
+      "artwork_slug": "inferno-duel",
+      "view": "side",
+      "path": "/assets/images/artworks/inferno-duel/inferno-duel-side.webp",
+      "thumb": "/assets/images/artworks/inferno-duel/inferno-duel-side-thumb.webp",
+      "width": 1800,
+      "height": 1200,
+      "original_width": 5760,
+      "original_height": 3840
+    },
+    {
+      "source": "Image_20260622211722_28_83.jpg",
+      "artwork_slug": "orc-warband",
+      "view": "overview",
+      "path": "/assets/images/artworks/orc-warband/orc-warband-overview.webp",
+      "thumb": "/assets/images/artworks/orc-warband/orc-warband-overview-thumb.webp",
+      "width": 1607,
+      "height": 1800,
+      "original_width": 3072,
+      "original_height": 3442
+    },
+    {
+      "source": "Image_20260622211723_29_83.jpg",
+      "artwork_slug": "orc-warband",
+      "view": "front-line",
+      "path": "/assets/images/artworks/orc-warband/orc-warband-front-line.webp",
+      "thumb": "/assets/images/artworks/orc-warband/orc-warband-front-line-thumb.webp",
+      "width": 1800,
+      "height": 1350,
+      "original_width": 4096,
+      "original_height": 3072
+    },
+    {
+      "source": "Image_20260622211724_30_83.jpg",
+      "artwork_slug": "orc-warband",
+      "view": "battle-scene",
+      "path": "/assets/images/artworks/orc-warband/orc-warband-battle-scene.webp",
+      "thumb": "/assets/images/artworks/orc-warband/orc-warband-battle-scene-thumb.webp",
+      "width": 1535,
+      "height": 1800,
+      "original_width": 3072,
+      "original_height": 3603
+    },
+    {
+      "source": "Image_20260622211805_31_83.jpg",
+      "artwork_slug": "crimson-sorceress",
+      "view": "hero",
+      "path": "/assets/images/artworks/crimson-sorceress/crimson-sorceress-hero.webp",
+      "thumb": "/assets/images/artworks/crimson-sorceress/crimson-sorceress-hero-thumb.webp",
+      "width": 1350,
+      "height": 1800,
+      "original_width": 3024,
+      "original_height": 4032
+    },
+    {
+      "source": "Image_20260622211806_32_83.jpg",
+      "artwork_slug": "arcane-standard-bearer",
+      "view": "hero",
+      "path": "/assets/images/artworks/arcane-standard-bearer/arcane-standard-bearer-hero.webp",
+      "thumb": "/assets/images/artworks/arcane-standard-bearer/arcane-standard-bearer-hero-thumb.webp",
+      "width": 1350,
+      "height": 1800,
+      "original_width": 3072,
+      "original_height": 4096
+    },
+    {
+      "source": "Image_20260622212403_35_83.jpg",
+      "artwork_slug": "ember-warlord",
+      "view": "three-quarter",
+      "path": "/assets/images/artworks/ember-warlord/ember-warlord-three-quarter.webp",
+      "thumb": "/assets/images/artworks/ember-warlord/ember-warlord-three-quarter-thumb.webp",
+      "width": 1800,
+      "height": 1200,
+      "original_width": 5760,
+      "original_height": 3840
+    },
+    {
+      "source": "Image_20260622212405_36_83.jpg",
+      "artwork_slug": "ember-warlord",
+      "view": "front",
+      "path": "/assets/images/artworks/ember-warlord/ember-warlord-front.webp",
+      "thumb": "/assets/images/artworks/ember-warlord/ember-warlord-front-thumb.webp",
+      "width": 1800,
+      "height": 1200,
+      "original_width": 5760,
+      "original_height": 3840
+    },
+    {
+      "source": "Image_20260622212424_42_83.jpg",
+      "artwork_slug": "ember-warlord",
+      "view": "hero",
+      "path": "/assets/images/artworks/ember-warlord/ember-warlord-hero.webp",
+      "thumb": "/assets/images/artworks/ember-warlord/ember-warlord-hero-thumb.webp",
+      "width": 1800,
+      "height": 1200,
+      "original_width": 5760,
+      "original_height": 3840
+    },
+    {
+      "source": "Image_20260622212411_38_83.jpg",
+      "artwork_slug": "azure-paladin",
+      "view": "black-front",
+      "path": "/assets/images/artworks/azure-paladin/azure-paladin-black-front.webp",
+      "thumb": "/assets/images/artworks/azure-paladin/azure-paladin-black-front-thumb.webp",
+      "width": 1800,
+      "height": 1200,
+      "original_width": 5760,
+      "original_height": 3840
+    },
+    {
+      "source": "Image_20260622212414_39_83.jpg",
+      "artwork_slug": "azure-paladin",
+      "view": "black-hero",
+      "path": "/assets/images/artworks/azure-paladin/azure-paladin-black-hero.webp",
+      "thumb": "/assets/images/artworks/azure-paladin/azure-paladin-black-hero-thumb.webp",
+      "width": 1800,
+      "height": 1200,
+      "original_width": 5760,
+      "original_height": 3840
+    },
+    {
+      "source": "Image_20260622212417_40_83.jpg",
+      "artwork_slug": "azure-paladin",
+      "view": "back",
+      "path": "/assets/images/artworks/azure-paladin/azure-paladin-back.webp",
+      "thumb": "/assets/images/artworks/azure-paladin/azure-paladin-back-thumb.webp",
+      "width": 1800,
+      "height": 1200,
+      "original_width": 5760,
+      "original_height": 3840
+    },
+    {
+      "source": "Image_20260622212421_41_83.jpg",
+      "artwork_slug": "azure-paladin",
+      "view": "logo-front",
+      "path": "/assets/images/artworks/azure-paladin/azure-paladin-logo-front.webp",
+      "thumb": "/assets/images/artworks/azure-paladin/azure-paladin-logo-front-thumb.webp",
+      "width": 1800,
+      "height": 1200,
+      "original_width": 5760,
+      "original_height": 3840
+    },
+    {
+      "source": "Image_20260622212428_43_83.jpg",
+      "artwork_slug": "azure-paladin",
+      "view": "white-hero",
+      "path": "/assets/images/artworks/azure-paladin/azure-paladin-white-hero.webp",
+      "thumb": "/assets/images/artworks/azure-paladin/azure-paladin-white-hero-thumb.webp",
+      "width": 1800,
+      "height": 1200,
+      "original_width": 5760,
+      "original_height": 3840
+    }
+  ]
+}
