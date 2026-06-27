@@ -1,0 +1,17 @@
+# Cloudflare Pages configuration for ArcForge.
+# Use this with `npx wrangler pages deploy pages-dist --project-name arcforge` if deploying from CLI.
+# In the Cloudflare dashboard, create a Pages project and use:
+#   Build command: npm install && npm run pages:build
+#   Build output directory: pages-dist
+
+compatibility_date = "2026-05-15"
+compatibility_flags = ["nodejs_compat"]
+
+[[d1_databases]]
+binding = "DB"
+database_name = "arcforge-database"
+database_id = "dcc74346-0345-4c64-a790-556dcc38840b"
+
+[[r2_buckets]]
+binding = "MEDIA"
+bucket_name = "arcforge-media"
