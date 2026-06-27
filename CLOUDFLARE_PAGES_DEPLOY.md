@@ -71,3 +71,17 @@ drizzle/0000_groovy_mongu.sql
 - 产品 API：`/api/products`
 - 媒体上传 API：`/api/upload`
 - R2 媒体访问：`/media/<storage_key>`
+
+## Admin password setup
+
+After deploying this version, open Cloudflare Pages → your ArcForge project → Settings → Environment variables.
+
+Add:
+
+- `ADMIN_PASSWORD` = your private admin password
+
+Optional:
+
+- `ADMIN_SESSION_SECRET` = a long random string for signing admin cookies
+
+Redeploy after adding environment variables. Then visit `/admin.html`, log in, and click **Import seed** once if D1 has not been populated yet.

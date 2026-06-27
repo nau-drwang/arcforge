@@ -1,3 +1,5 @@
+import { requireAdmin, json } from './auth';
+interface Env { DB: D1Database; ADMIN_PASSWORD?: string; ADMIN_SESSION_SECRET?: string; }
 export const seedArtworks = [
   {
     id: 'af-001-inferno-duel', title: 'Inferno Duel', title_zh: '熔火对决', slug: 'inferno-duel', category: 'Fantasy Battle Diorama', price_cents: 0, currency: 'USD', status: 'published', inventory: 1, material: 'Hand-painted resin, scenic base, flame-effect finish', height_cm: null, description: 'A dramatic two-character battle scene staged across a cracked lava base, combining dynamic motion, armor detail, and theatrical contrast.', cover_media_key: '/assets/images/artworks/inferno-duel/inferno-duel-hero.webp', gallery: ['/assets/images/artworks/inferno-duel/inferno-duel-hero.webp','/assets/images/artworks/inferno-duel/inferno-duel-wide-angle.webp','/assets/images/artworks/inferno-duel/inferno-duel-front.webp','/assets/images/artworks/inferno-duel/inferno-duel-side.webp'], alt: 'Hand-painted fantasy battle diorama with lava base', created_at: '2026-06-27T00:00:00.000Z'
@@ -18,3 +20,25 @@ export const seedArtworks = [
     id: 'af-006-azure-paladin', title: 'Azure Paladin', title_zh: '湛蓝圣骑士', slug: 'azure-paladin', category: 'Character Sculpture', price_cents: 0, currency: 'USD', status: 'published', inventory: 1, material: 'Hand-painted resin with blue cloak, ice-effect base, and metallic armor', height_cm: null, description: 'A heroic sword-bearing figure defined by a sweeping blue cloak, icy basework, and polished armor highlights.', cover_media_key: '/assets/images/artworks/azure-paladin/azure-paladin-white-hero.webp', gallery: ['/assets/images/artworks/azure-paladin/azure-paladin-white-hero.webp','/assets/images/artworks/azure-paladin/azure-paladin-black-hero.webp','/assets/images/artworks/azure-paladin/azure-paladin-black-front.webp','/assets/images/artworks/azure-paladin/azure-paladin-back.webp'], alt: 'Blue cloaked fantasy paladin sculpture with ice base', created_at: '2026-06-27T00:00:00.000Z'
   }
 ];
+
+export const onRequestPost: PagesFunction<Env> = async ({ request, env }) => {
+  const denied = await requireAdmin(request, env);
+  if (denied) return denied;
+  let inserted = 0;
+  let updated = 0;
+  for (const item of seedArtworks) {
+    const existing = await env.DB.prepare('SELECT id FROM artworks WHERE id = ?').bind(item.id).first<{ id: string }>();
+    const galleryJson = JSON.stringify(item.gallery || []);
+    if (existing) {
+      await env.DB.prepare(`UPDATE artworks SET title = ?, slug = ?, price_cents = ?, currency = ?, status = ?, inventory = ?, material = ?, height_cm = ?, description = ?, cover_media_key = ?, title_zh = ?, category = ?, gallery_json = ?, alt = ?, sort_order = ? WHERE id = ?`)
+        .bind(item.title, item.slug, item.price_cents, item.currency, item.status, item.inventory, item.material, item.height_cm, item.description, item.cover_media_key, item.title_zh, item.category, galleryJson, item.alt, 0, item.id)
+        .run();
+      updated++;
+    } else {
+      await env.DB.prepare(`INSERT INTO artworks (id, title, slug, price_cents, currency, status, inventory, material, height_cm, description, cover_media_key, title_zh, category, gallery_json, alt, sort_order, created_at)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`).bind(item.id, item.title, item.slug, item.price_cents, item.currency, item.status, item.inventory, item.material, item.height_cm, item.description, item.cover_media_key, item.title_zh, item.category, galleryJson, item.alt, 0, item.created_at).run();
+      inserted++;
+    }
+  }
+  return json({ ok: true, inserted, updated });
+};
