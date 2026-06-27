@@ -1,16 +1,53 @@
-# Arcforge Pages Full Stack
+# ArcForge Pages Full Stack
 
-基于旧版 Arcforge Worker 外观重新整理的 Cloudflare Pages Full Stack 项目。
+ArcForge is a Cloudflare Pages Full Stack project using Pages + Functions + D1 + R2.
 
-部署请看 `CLOUDFLARE_PAGES_DEPLOY.md`。
+This repository is intentionally kept as **one GitHub repo**, but the code is now separated by responsibility:
+
+```text
+arcforge/
+  frontend/          # Public website and admin UI source files
+    src/             # HTML, CSS, JS source files
+    public/          # Static assets copied into dist/
+
+  backend/           # Cloudflare backend source files
+    functions/       # Pages Functions API source
+    migrations/      # D1 SQL migrations
+
+  data/              # Seed data and structured content
+    seed/artworks.json
+
+  docs/              # Deployment notes and asset library documentation
+  scripts/           # Build scripts
+  dist/              # Generated frontend output
+  functions/         # Generated deployment mirror of backend/functions
+```
+
+## How updates work
+
+- Frontend changes: edit files in `frontend/src/` or `frontend/public/`.
+- Backend/API changes: edit files in `backend/functions/`.
+- Database schema changes: add SQL files under `backend/migrations/`.
+- Artwork seed data: update `data/seed/artworks.json` and/or `frontend/public/data/artworks.json`.
+
+Cloudflare Pages still deploys from this single repo. The build command is:
+
+```bash
+npm run build
+```
+
+The build script copies:
+
+- `frontend/public/` + `frontend/src/` into `dist/`
+- `backend/functions/` into root `functions/` for Cloudflare Pages deployment
 
 ## Admin portal
 
-ArcForge now includes a password-protected admin portal at `/admin.html`.
+The admin portal is available at `/admin.html`.
 
 Required Cloudflare Pages environment variable:
 
-- `ADMIN_PASSWORD` - password used to log into the admin portal.
+- `ADMIN_PASSWORD` - password used to log into the admin portal
 
 Optional:
 
@@ -25,4 +62,6 @@ Admin capabilities:
 - Delete artwork records
 - Upload images/videos to R2 and attach media keys to artwork records
 
-Public visitors can still read `/api/products`, but create/update/delete/upload actions require admin login.
+Public visitors can read `/api/products`, but create/update/delete/upload actions require admin login.
+
+Deployment notes are in `docs/CLOUDFLARE_PAGES_DEPLOY.md`.

@@ -2,7 +2,11 @@ import fs from 'node:fs';
 import path from 'node:path';
 
 const root = process.cwd();
+const frontendRoot = path.join(root, 'frontend');
+const backendRoot = path.join(root, 'backend');
 const dist = path.join(root, 'dist');
+const functionsOut = path.join(root, 'functions');
+
 fs.rmSync(dist, { recursive: true, force: true });
 fs.mkdirSync(dist, { recursive: true });
 
@@ -17,8 +21,16 @@ function copyDir(src, dest) {
   }
 }
 
-copyDir(path.join(root, 'public'), dist);
-for (const file of fs.readdirSync(path.join(root, 'src'))) {
-  fs.copyFileSync(path.join(root, 'src', file), path.join(dist, file));
+copyDir(path.join(frontendRoot, 'public'), dist);
+for (const file of fs.readdirSync(path.join(frontendRoot, 'src'))) {
+  const from = path.join(frontendRoot, 'src', file);
+  const to = path.join(dist, file);
+  if (fs.statSync(from).isFile()) fs.copyFileSync(from, to);
 }
-console.log('Built Cloudflare Pages static assets to dist/');
+
+// Cloudflare Pages expects a root-level functions directory.
+// backend/functions is the canonical source; this mirror is generated for deployment.
+fs.rmSync(functionsOut, { recursive: true, force: true });
+copyDir(path.join(backendRoot, 'functions'), functionsOut);
+
+console.log('Built frontend to dist/ and synced backend/functions to functions/');
