@@ -8,8 +8,10 @@ async function loadLocalSeed(){
   return localSeed;
 }
 
+function isZh(){ return document.documentElement.lang && document.documentElement.lang.toLowerCase().startsWith('zh'); }
+function t(en, zh){ return isZh() ? zh : en; }
 function money(cents, currency='USD'){
-  if(!cents) return 'Inquiry';
+  if(!cents) return t('Inquiry','询价');
   return new Intl.NumberFormat('en-US',{style:'currency',currency}).format((cents||0)/100);
 }
 function mediaUrl(key){
@@ -37,7 +39,14 @@ function galleryStrip(p){
 function card(p){
   const cover = mediaUrl(p.cover_media_key);
   const full = mediaUrl((Array.isArray(p.gallery) && p.gallery[0]) || p.cover_media_key);
-  return `<article class="card artwork-card"><button class="product-img image-button" type="button" data-full="${escapeHtml(full)}" data-caption="${escapeHtml(p.title)}"><img src="${cover}" alt="${escapeHtml(p.alt || p.title)}" loading="lazy"></button><div class="card-body"><div class="title-row"><div><p class="category">${escapeHtml(p.category || 'Artwork')}</p><h3>${escapeHtml(p.title)}</h3>${p.title_zh?`<span class="zh-title">${escapeHtml(p.title_zh)}</span>`:''}</div><span class="price">${money(p.price_cents,p.currency)}</span></div><p class="desc">${escapeHtml(p.description||'')}</p>${galleryStrip(p)}<dl class="details"><div><dt>Material</dt><dd>${escapeHtml(p.material||'Hand-painted resin')}</dd></div><div><dt>Availability</dt><dd>${p.inventory>0?'Available / Commission':'Archive'}</dd></div></dl><div class="card-actions"><span class="tag">${escapeHtml(p.slug || p.id)}</span><a class="btn primary" href="/checkout.html?artwork=${encodeURIComponent(p.id)}&title=${encodeURIComponent(p.title)}">Inquire</a></div></div></article>`;
+  const displayTitle = isZh() && p.title_zh ? p.title_zh : p.title;
+  const secondaryTitle = isZh() && p.title_zh ? p.title : p.title_zh;
+  const category = isZh() ? (p.category_zh || p.category || '作品') : (p.category || 'Artwork');
+  const description = isZh() ? (p.description_zh || p.description || '') : (p.description || '');
+  const material = isZh() ? (p.material_zh || p.material || '手工上色树脂') : (p.material || 'Hand-painted resin');
+  const availability = p.inventory>0 ? t('Available / Commission','可咨询 / 可定制') : t('Archive','档案');
+  const inquiryUrl = `${isZh()?'/zh-checkout.html':'/checkout.html'}?artwork=${encodeURIComponent(p.id)}&title=${encodeURIComponent(displayTitle)}`;
+  return `<article class="card artwork-card"><button class="product-img image-button" type="button" data-full="${escapeHtml(full)}" data-caption="${escapeHtml(displayTitle)}"><img src="${cover}" alt="${escapeHtml(p.alt || displayTitle)}" loading="lazy"></button><div class="card-body"><div class="title-row"><div><p class="category">${escapeHtml(category)}</p><h3>${escapeHtml(displayTitle)}</h3>${secondaryTitle?`<span class="zh-title">${escapeHtml(secondaryTitle)}</span>`:''}</div><span class="price">${money(p.price_cents,p.currency)}</span></div><p class="desc">${escapeHtml(description)}</p>${galleryStrip({...p,title:displayTitle})}<dl class="details"><div><dt>${t('Material','材质')}</dt><dd>${escapeHtml(material)}</dd></div><div><dt>${t('Availability','状态')}</dt><dd>${availability}</dd></div></dl><div class="card-actions"><span class="tag">${escapeHtml(p.slug || p.id)}</span><a class="btn primary" href="${inquiryUrl}">${t('Inquire','咨询')}</a></div></div></article>`;
 }
 function setupLightbox(){
   const box=document.querySelector('[data-lightbox]');
