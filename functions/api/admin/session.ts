@@ -1,5 +1,8 @@
-import { isAdmin, json } from '../auth';
-interface Env { ADMIN_USERNAME?: string; ADMIN_PASSWORD?: string; ADMIN_SESSION_SECRET?: string; }
+import { countUsers, getCurrentUser, isConfigured, json } from '../auth';
+interface Env { DB: D1Database; SESSION_SECRET?: string; ADMIN_SESSION_SECRET?: string; }
 export const onRequestGet: PagesFunction<Env> = async ({ request, env }) => {
-  return json({ authenticated: await isAdmin(request, env), configured: Boolean(env.ADMIN_PASSWORD), username: env.ADMIN_USERNAME || 'admin' });
+  const configured = isConfigured(env);
+  const users = configured ? await countUsers(env) : 0;
+  const user = configured ? await getCurrentUser(request, env) : null;
+  return json({ configured, setup_required: configured && users === 0, authenticated: Boolean(user), user });
 };

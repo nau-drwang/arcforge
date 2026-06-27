@@ -1,5 +1,5 @@
 import { requireAdmin } from './auth';
-interface Env { DB: D1Database; MEDIA: R2Bucket; ADMIN_PASSWORD?: string; ADMIN_SESSION_SECRET?: string; }
+interface Env { DB: D1Database; MEDIA: R2Bucket; SESSION_SECRET?: string; ADMIN_SESSION_SECRET?: string; }
 function json(data: unknown, status = 200) { return new Response(JSON.stringify(data), { status, headers: { 'content-type': 'application/json; charset=utf-8' } }); }
 function safeName(name: string) { return name.toLowerCase().replace(/[^a-z0-9._-]+/g, '-').replace(/-+/g, '-'); }
 

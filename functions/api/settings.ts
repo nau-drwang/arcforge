@@ -1,5 +1,5 @@
 import { requireAdmin, json } from './auth';
-interface Env { DB: D1Database; ADMIN_PASSWORD?: string; ADMIN_SESSION_SECRET?: string; }
+interface Env { DB: D1Database; SESSION_SECRET?: string; ADMIN_SESSION_SECRET?: string; }
 type Setting = { key: string; value: string; updated_at: string };
 export const onRequestGet: PagesFunction<Env> = async ({ request, env }) => {
   const denied = await requireAdmin(request, env); if (denied) return denied;

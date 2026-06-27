@@ -1,5 +1,5 @@
 import { requireAdmin, json } from './auth';
-interface Env { DB: D1Database; MEDIA: R2Bucket; ADMIN_PASSWORD?: string; ADMIN_SESSION_SECRET?: string; }
+interface Env { DB: D1Database; MEDIA: R2Bucket; SESSION_SECRET?: string; ADMIN_SESSION_SECRET?: string; }
 type MediaRow = { id: string; artwork_id: string; storage_key: string; filename: string; content_type: string; kind: string; size_bytes: number; created_at: string };
 export const onRequestGet: PagesFunction<Env> = async ({ request, env }) => {
   const denied = await requireAdmin(request, env); if (denied) return denied;

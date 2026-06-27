@@ -1,5 +1,5 @@
 import { requireAdmin, json } from './auth';
-interface Env { DB: D1Database; ADMIN_PASSWORD?: string; ADMIN_SESSION_SECRET?: string; }
+interface Env { DB: D1Database; SESSION_SECRET?: string; ADMIN_SESSION_SECRET?: string; }
 export const seedArtworks = [
   {
     id: 'af-001-inferno-duel', title: 'Inferno Duel', title_zh: '熔火对决', slug: 'inferno-duel', category: 'Fantasy Battle Diorama', price_cents: 0, currency: 'USD', status: 'published', inventory: 1, material: 'Hand-painted resin, scenic base, flame-effect finish', height_cm: null, description: 'A dramatic two-character battle scene staged across a cracked lava base, combining dynamic motion, armor detail, and theatrical contrast.', cover_media_key: '/assets/images/artworks/inferno-duel/inferno-duel-hero.webp', gallery: ['/assets/images/artworks/inferno-duel/inferno-duel-hero.webp','/assets/images/artworks/inferno-duel/inferno-duel-wide-angle.webp','/assets/images/artworks/inferno-duel/inferno-duel-front.webp','/assets/images/artworks/inferno-duel/inferno-duel-side.webp'], alt: 'Hand-painted fantasy battle diorama with lava base', created_at: '2026-06-27T00:00:00.000Z'

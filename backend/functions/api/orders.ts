@@ -1,7 +1,9 @@
+import { ensureCmsSchema } from './auth';
 interface Env { DB: D1Database; }
 function json(data: unknown, status = 200) { return new Response(JSON.stringify(data), { status, headers: { 'content-type': 'application/json; charset=utf-8' } }); }
 
 export const onRequestPost: PagesFunction<Env> = async ({ request, env }) => {
+  await ensureCmsSchema(env as any);
   const body = await request.json().catch(() => null) as { artwork_id?: string; buyer_email?: string; buyer_name?: string } | null;
   if (!body?.artwork_id || !body?.buyer_email || !body?.buyer_name) return json({ error: 'artwork_id, buyer_email, and buyer_name are required' }, 400);
 

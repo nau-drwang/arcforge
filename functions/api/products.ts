@@ -1,7 +1,7 @@
 import { seedArtworks } from './seed';
-import { requireAdmin } from './auth';
+import { ensureCmsSchema, requireAdmin } from './auth';
 
-interface Env { DB: D1Database; MEDIA: R2Bucket; ADMIN_PASSWORD?: string; ADMIN_SESSION_SECRET?: string; }
+interface Env { DB: D1Database; MEDIA: R2Bucket; SESSION_SECRET?: string; ADMIN_SESSION_SECRET?: string; }
 
 type ArtworkRow = {
   id: string;
@@ -42,6 +42,7 @@ function normalizeArtwork(row: ArtworkRow) {
 
 export const onRequestGet: PagesFunction<Env> = async ({ request, env }) => {
   try {
+    await ensureCmsSchema(env);
     const url = new URL(request.url);
     const includeAll = url.searchParams.get('admin') === '1' && !(await requireAdmin(request, env));
     const sql = includeAll
@@ -56,6 +57,7 @@ export const onRequestGet: PagesFunction<Env> = async ({ request, env }) => {
 };
 
 export const onRequestPost: PagesFunction<Env> = async ({ request, env }) => {
+  await ensureCmsSchema(env);
   const denied = await requireAdmin(request, env);
   if (denied) return denied;
   const body = await request.json().catch(() => null) as Partial<ArtworkRow> & { price?: number; gallery?: string[] } | null;
@@ -79,6 +81,7 @@ export const onRequestPost: PagesFunction<Env> = async ({ request, env }) => {
 
 
 export const onRequestPut: PagesFunction<Env> = async ({ request, env }) => {
+  await ensureCmsSchema(env);
   const denied = await requireAdmin(request, env);
   if (denied) return denied;
   const body = await request.json().catch(() => null) as Partial<ArtworkRow> & { id?: string; price?: number; gallery?: string[] } | null;
@@ -100,6 +103,7 @@ export const onRequestPut: PagesFunction<Env> = async ({ request, env }) => {
 };
 
 export const onRequestDelete: PagesFunction<Env> = async ({ request, env }) => {
+  await ensureCmsSchema(env);
   const denied = await requireAdmin(request, env);
   if (denied) return denied;
   const url = new URL(request.url);

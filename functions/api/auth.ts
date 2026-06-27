@@ -1,7 +1,110 @@
-export interface AdminEnv { ADMIN_USERNAME?: string; ADMIN_PASSWORD?: string; ADMIN_SESSION_SECRET?: string; }
+export interface CmsEnv { DB: D1Database; SESSION_SECRET?: string; ADMIN_SESSION_SECRET?: string; }
+
+export type AdminUser = {
+  id: string;
+  username: string;
+  email?: string | null;
+  role: string;
+  password_hash: string;
+  password_salt: string;
+  password_iterations: number;
+  is_active: number;
+  created_at: string;
+  updated_at: string;
+  last_login_at?: string | null;
+};
 
 export function json(data: unknown, status = 200, headers: HeadersInit = {}) {
   return new Response(JSON.stringify(data), { status, headers: { 'content-type': 'application/json; charset=utf-8', ...headers } });
+}
+
+
+let schemaPromise: Promise<void> | null = null;
+
+async function runSchemaStatement(env: CmsEnv, sql: string) {
+  await env.DB.prepare(sql).run().catch(() => undefined);
+}
+
+export async function ensureCmsSchema(env: CmsEnv) {
+  if (schemaPromise) return schemaPromise;
+  schemaPromise = (async () => {
+    await runSchemaStatement(env, `CREATE TABLE IF NOT EXISTS artworks (
+      id text PRIMARY KEY NOT NULL,
+      title text NOT NULL,
+      slug text NOT NULL,
+      price_cents integer NOT NULL DEFAULT 0,
+      currency text DEFAULT 'USD' NOT NULL,
+      status text DEFAULT 'draft' NOT NULL,
+      inventory integer DEFAULT 1 NOT NULL,
+      material text NOT NULL DEFAULT '',
+      height_cm real,
+      description text NOT NULL DEFAULT '',
+      cover_media_key text,
+      created_at text NOT NULL
+    )`);
+    await runSchemaStatement(env, `CREATE UNIQUE INDEX IF NOT EXISTS artworks_slug_unique ON artworks (slug)`);
+    await runSchemaStatement(env, `ALTER TABLE artworks ADD COLUMN title_zh text`);
+    await runSchemaStatement(env, `ALTER TABLE artworks ADD COLUMN category text`);
+    await runSchemaStatement(env, `ALTER TABLE artworks ADD COLUMN gallery_json text`);
+    await runSchemaStatement(env, `ALTER TABLE artworks ADD COLUMN alt text`);
+    await runSchemaStatement(env, `ALTER TABLE artworks ADD COLUMN sort_order integer DEFAULT 0 NOT NULL`);
+    await runSchemaStatement(env, `CREATE INDEX IF NOT EXISTS artworks_status_sort_idx ON artworks (status, sort_order)`);
+
+    await runSchemaStatement(env, `CREATE TABLE IF NOT EXISTS artwork_media (
+      id text PRIMARY KEY NOT NULL,
+      artwork_id text NOT NULL,
+      storage_key text NOT NULL,
+      filename text NOT NULL,
+      content_type text NOT NULL,
+      kind text NOT NULL,
+      size_bytes integer NOT NULL,
+      created_at text NOT NULL
+    )`);
+    await runSchemaStatement(env, `CREATE INDEX IF NOT EXISTS artwork_media_artwork_id_idx ON artwork_media (artwork_id)`);
+
+    await runSchemaStatement(env, `CREATE TABLE IF NOT EXISTS orders (
+      id text PRIMARY KEY NOT NULL,
+      artwork_id text NOT NULL,
+      buyer_email text NOT NULL,
+      buyer_name text NOT NULL,
+      amount_cents integer NOT NULL,
+      currency text DEFAULT 'USD' NOT NULL,
+      payment_status text DEFAULT 'pending' NOT NULL,
+      created_at text NOT NULL
+    )`);
+
+    await runSchemaStatement(env, `CREATE TABLE IF NOT EXISTS site_settings (
+      key text PRIMARY KEY NOT NULL,
+      value text NOT NULL,
+      updated_at text NOT NULL
+    )`);
+
+    await runSchemaStatement(env, `CREATE TABLE IF NOT EXISTS admin_users (
+      id text PRIMARY KEY NOT NULL,
+      username text NOT NULL UNIQUE,
+      email text,
+      role text NOT NULL DEFAULT 'owner',
+      password_hash text NOT NULL,
+      password_salt text NOT NULL,
+      password_iterations integer NOT NULL DEFAULT 210000,
+      is_active integer NOT NULL DEFAULT 1,
+      last_login_at text,
+      created_at text NOT NULL,
+      updated_at text NOT NULL
+    )`);
+    await runSchemaStatement(env, `CREATE INDEX IF NOT EXISTS admin_users_username_idx ON admin_users (username)`);
+    await runSchemaStatement(env, `CREATE INDEX IF NOT EXISTS admin_users_active_idx ON admin_users (is_active)`);
+  })();
+  return schemaPromise;
+}
+
+
+function getSessionSecret(env: CmsEnv) {
+  return env.SESSION_SECRET || env.ADMIN_SESSION_SECRET || '';
+}
+
+export function isConfigured(env: CmsEnv) {
+  return Boolean(getSessionSecret(env));
 }
 
 function getCookie(request: Request, name: string) {
@@ -14,6 +117,14 @@ function toBase64Url(buffer: ArrayBuffer) {
   const bytes = new Uint8Array(buffer);
   for (const byte of bytes) binary += String.fromCharCode(byte);
   return btoa(binary).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/g, '');
+}
+
+function fromBase64Url(value: string) {
+  const padded = value.replace(/-/g, '+').replace(/_/g, '/') + '='.repeat((4 - value.length % 4) % 4);
+  const binary = atob(padded);
+  const bytes = new Uint8Array(binary.length);
+  for (let i = 0; i < binary.length; i++) bytes[i] = binary.charCodeAt(i);
+  return bytes.buffer;
 }
 
 async function sign(message: string, secret: string) {
@@ -29,28 +140,53 @@ export function timingSafeEqual(a = '', b = '') {
   return out === 0;
 }
 
-export async function createAdminCookie(env: AdminEnv, username: string) {
-  const secret = env.ADMIN_SESSION_SECRET || env.ADMIN_PASSWORD;
-  if (!secret) throw new Error('ADMIN_PASSWORD is not configured');
+export async function hashPassword(password: string, saltBase64Url?: string, iterations = 210000) {
+  const salt = saltBase64Url ? new Uint8Array(fromBase64Url(saltBase64Url)) : crypto.getRandomValues(new Uint8Array(16));
+  const keyMaterial = await crypto.subtle.importKey('raw', new TextEncoder().encode(password), 'PBKDF2', false, ['deriveBits']);
+  const bits = await crypto.subtle.deriveBits({ name: 'PBKDF2', salt, iterations, hash: 'SHA-256' }, keyMaterial, 256);
+  return { hash: toBase64Url(bits), salt: toBase64Url(salt.buffer), iterations };
+}
+
+export async function verifyPassword(password: string, user: Pick<AdminUser, 'password_hash' | 'password_salt' | 'password_iterations'>) {
+  const candidate = await hashPassword(password, user.password_salt, user.password_iterations || 210000);
+  return timingSafeEqual(candidate.hash, user.password_hash);
+}
+
+export async function countUsers(env: CmsEnv) {
+  await ensureCmsSchema(env);
+  const row = await env.DB.prepare('SELECT COUNT(*) as total FROM admin_users').first<{ total: number }>().catch(() => ({ total: 0 }));
+  return Number(row?.total || 0);
+}
+
+export async function createAdminCookie(env: CmsEnv, user: Pick<AdminUser, 'id' | 'username' | 'role'>) {
+  const secret = getSessionSecret(env);
+  if (!secret) throw new Error('SESSION_SECRET is not configured');
   const expiresAt = Date.now() + 1000 * 60 * 60 * 8;
-  const user = username || env.ADMIN_USERNAME || 'admin';
-  const payload = `${expiresAt}.${user}`;
+  const payload = `${expiresAt}.${user.id}.${user.username}.${user.role}`;
   const signature = await sign(payload, secret);
   const value = `${payload}.${signature}`;
   return `af_admin=${value}; Path=/; Max-Age=28800; HttpOnly; Secure; SameSite=Lax`;
 }
 
-export async function isAdmin(request: Request, env: AdminEnv) {
-  const secret = env.ADMIN_SESSION_SECRET || env.ADMIN_PASSWORD;
-  if (!secret) return false;
+export async function getCurrentUser(request: Request, env: CmsEnv) {
+  await ensureCmsSchema(env);
+  const secret = getSessionSecret(env);
+  if (!secret) return null;
   const cookie = getCookie(request, 'af_admin');
-  const [expiresAt, user, signature] = cookie.split('.');
-  if (!expiresAt || !user || !signature || Number(expiresAt) < Date.now()) return false;
-  const expected = await sign(`${expiresAt}.${user}`, secret);
-  return timingSafeEqual(signature, expected);
+  const [expiresAt, userId, username, role, signature] = cookie.split('.');
+  if (!expiresAt || !userId || !username || !role || !signature || Number(expiresAt) < Date.now()) return null;
+  const expected = await sign(`${expiresAt}.${userId}.${username}.${role}`, secret);
+  if (!timingSafeEqual(signature, expected)) return null;
+  const user = await env.DB.prepare('SELECT id, username, email, role, is_active, last_login_at, created_at, updated_at FROM admin_users WHERE id = ? AND is_active = 1')
+    .bind(userId).first<Omit<AdminUser, 'password_hash' | 'password_salt' | 'password_iterations'>>().catch(() => null);
+  return user || null;
 }
 
-export async function requireAdmin(request: Request, env: AdminEnv) {
+export async function isAdmin(request: Request, env: CmsEnv) {
+  return Boolean(await getCurrentUser(request, env));
+}
+
+export async function requireAdmin(request: Request, env: CmsEnv) {
   if (await isAdmin(request, env)) return null;
   return json({ error: 'Admin login required' }, 401);
 }
