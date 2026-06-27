@@ -1,5 +1,5 @@
 {
-  "version": "2026-06-27-asset-library-v1",
+  "version": "2026-06-27-crop-link-fix-v2",
   "language": "en",
   "artworks": [
     {
@@ -58,8 +58,10 @@
       "material": "Hand-painted resin with high-contrast armor and base accents",
       "height_cm": null,
       "description": "A striking single-character figure built around sharp silhouettes, saturated red armor, and a supernatural display base.",
-      "cover_media_key": "/assets/images/artworks/crimson-sorceress/crimson-sorceress-hero.webp",
-      "gallery": ["/assets/images/artworks/crimson-sorceress/crimson-sorceress-hero.webp"],
+      "cover_media_key": "/assets/images/artworks/crimson-sorceress/crimson-sorceress-cover.webp",
+      "gallery": [
+        "/assets/images/artworks/crimson-sorceress/crimson-sorceress-hero.webp"
+      ],
       "alt": "Crimson fantasy sorceress character sculpture"
     },
     {
@@ -75,8 +77,10 @@
       "material": "Hand-painted resin, ornate base, metallic and neon accents",
       "height_cm": null,
       "description": "A ceremonial fantasy figure with a vertical composition, elaborate armor, and luminous green base details.",
-      "cover_media_key": "/assets/images/artworks/arcane-standard-bearer/arcane-standard-bearer-hero.webp",
-      "gallery": ["/assets/images/artworks/arcane-standard-bearer/arcane-standard-bearer-hero.webp"],
+      "cover_media_key": "/assets/images/artworks/arcane-standard-bearer/arcane-standard-bearer-cover.webp",
+      "gallery": [
+        "/assets/images/artworks/arcane-standard-bearer/arcane-standard-bearer-hero.webp"
+      ],
       "alt": "Fantasy standard bearer sculpture with glowing green base"
     },
     {
