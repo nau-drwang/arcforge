@@ -40,9 +40,14 @@ function normalizeArtwork(row: ArtworkRow) {
   return { ...row, gallery };
 }
 
-export const onRequestGet: PagesFunction<Env> = async ({ env }) => {
+export const onRequestGet: PagesFunction<Env> = async ({ request, env }) => {
   try {
-    const { results = [] } = await env.DB.prepare('SELECT * FROM artworks ORDER BY sort_order ASC, created_at DESC').all<ArtworkRow>();
+    const url = new URL(request.url);
+    const includeAll = url.searchParams.get('admin') === '1' && !(await requireAdmin(request, env));
+    const sql = includeAll
+      ? 'SELECT * FROM artworks ORDER BY sort_order ASC, created_at DESC'
+      : "SELECT * FROM artworks WHERE status = 'published' ORDER BY sort_order ASC, created_at DESC";
+    const { results = [] } = await env.DB.prepare(sql).all<ArtworkRow>();
     const products = results.map(normalizeArtwork);
     return json({ products: products.length ? products : sampleProducts, source: products.length ? 'd1' : 'seed' });
   } catch (error) {

@@ -1,8 +1,20 @@
 # Backend
 
-Edit Cloudflare Pages Functions and D1 migrations here.
+Canonical backend source lives in `backend/functions/`.
 
-- `functions/` is the canonical source for API routes.
-- `migrations/` contains D1 SQL migration files.
+`scripts/build.mjs` mirrors this folder to root-level `functions/` because Cloudflare Pages expects the deployment Functions directory at the repository root.
 
-The build script mirrors `backend/functions/` to the root `functions/` directory because Cloudflare Pages expects Functions at the repo root during deployment.
+## Main API
+
+- `GET /api/products` - public published artwork data
+- `GET /api/products?admin=1` - all artwork records, requires admin login
+- `POST /api/products` - create artwork, requires admin login
+- `PUT /api/products` - update artwork, requires admin login
+- `DELETE /api/products?id=...` - delete artwork, requires admin login
+- `POST /api/upload` - upload media to R2, requires admin login
+- `GET /api/media` - list media, requires admin login
+- `DELETE /api/media?key=...` - delete media, requires admin login
+- `POST /api/admin/login` - login
+- `POST /api/admin/logout` - logout
+- `GET /api/admin/session` - check session
+- `GET/PUT /api/settings` - D1 site settings, requires admin login

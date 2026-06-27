@@ -1,6 +1,6 @@
-export interface AdminEnv { ADMIN_PASSWORD?: string; ADMIN_SESSION_SECRET?: string; }
+export interface AdminEnv { ADMIN_USERNAME?: string; ADMIN_PASSWORD?: string; ADMIN_SESSION_SECRET?: string; }
 
-function json(data: unknown, status = 200, headers: HeadersInit = {}) {
+export function json(data: unknown, status = 200, headers: HeadersInit = {}) {
   return new Response(JSON.stringify(data), { status, headers: { 'content-type': 'application/json; charset=utf-8', ...headers } });
 }
 
@@ -22,20 +22,21 @@ async function sign(message: string, secret: string) {
   return toBase64Url(signature);
 }
 
-function timingSafeEqual(a: string, b: string) {
+export function timingSafeEqual(a = '', b = '') {
   if (a.length !== b.length) return false;
   let out = 0;
   for (let i = 0; i < a.length; i++) out |= a.charCodeAt(i) ^ b.charCodeAt(i);
   return out === 0;
 }
 
-export async function createAdminCookie(env: AdminEnv) {
+export async function createAdminCookie(env: AdminEnv, username: string) {
   const secret = env.ADMIN_SESSION_SECRET || env.ADMIN_PASSWORD;
   if (!secret) throw new Error('ADMIN_PASSWORD is not configured');
   const expiresAt = Date.now() + 1000 * 60 * 60 * 8;
-  const message = String(expiresAt);
-  const signature = await sign(message, secret);
-  const value = `${message}.${signature}`;
+  const user = username || env.ADMIN_USERNAME || 'admin';
+  const payload = `${expiresAt}.${user}`;
+  const signature = await sign(payload, secret);
+  const value = `${payload}.${signature}`;
   return `af_admin=${value}; Path=/; Max-Age=28800; HttpOnly; Secure; SameSite=Lax`;
 }
 
@@ -43,9 +44,9 @@ export async function isAdmin(request: Request, env: AdminEnv) {
   const secret = env.ADMIN_SESSION_SECRET || env.ADMIN_PASSWORD;
   if (!secret) return false;
   const cookie = getCookie(request, 'af_admin');
-  const [expiresAt, signature] = cookie.split('.');
-  if (!expiresAt || !signature || Number(expiresAt) < Date.now()) return false;
-  const expected = await sign(expiresAt, secret);
+  const [expiresAt, user, signature] = cookie.split('.');
+  if (!expiresAt || !user || !signature || Number(expiresAt) < Date.now()) return false;
+  const expected = await sign(`${expiresAt}.${user}`, secret);
   return timingSafeEqual(signature, expected);
 }
 
@@ -57,5 +58,3 @@ export async function requireAdmin(request: Request, env: AdminEnv) {
 export function clearAdminCookie() {
   return 'af_admin=; Path=/; Max-Age=0; HttpOnly; Secure; SameSite=Lax';
 }
-
-export { json };
