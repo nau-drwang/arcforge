@@ -86,7 +86,7 @@ export async function ensureCmsSchema(env: CmsEnv) {
       role text NOT NULL DEFAULT 'owner',
       password_hash text NOT NULL,
       password_salt text NOT NULL,
-      password_iterations integer NOT NULL DEFAULT 210000,
+      password_iterations integer NOT NULL DEFAULT 100000,
       is_active integer NOT NULL DEFAULT 1,
       last_login_at text,
       created_at text NOT NULL,
@@ -152,7 +152,7 @@ export function timingSafeEqual(a = '', b = '') {
   return out === 0;
 }
 
-export async function hashPassword(password: string, saltBase64Url?: string, iterations = 210000) {
+export async function hashPassword(password: string, saltBase64Url?: string, iterations = 100000) {
   const salt = saltBase64Url ? new Uint8Array(fromBase64Url(saltBase64Url)) : crypto.getRandomValues(new Uint8Array(16));
   const keyMaterial = await crypto.subtle.importKey('raw', new TextEncoder().encode(password), 'PBKDF2', false, ['deriveBits']);
   const bits = await crypto.subtle.deriveBits({ name: 'PBKDF2', salt, iterations, hash: 'SHA-256' }, keyMaterial, 256);
@@ -160,7 +160,7 @@ export async function hashPassword(password: string, saltBase64Url?: string, ite
 }
 
 export async function verifyPassword(password: string, user: Pick<AdminUser, 'password_hash' | 'password_salt' | 'password_iterations'>) {
-  const candidate = await hashPassword(password, user.password_salt, user.password_iterations || 210000);
+  const candidate = await hashPassword(password, user.password_salt, user.password_iterations || 100000);
   return timingSafeEqual(candidate.hash, user.password_hash);
 }
 

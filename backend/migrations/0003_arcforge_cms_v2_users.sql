@@ -5,7 +5,7 @@ CREATE TABLE IF NOT EXISTS admin_users (
   role text NOT NULL DEFAULT 'owner',
   password_hash text NOT NULL,
   password_salt text NOT NULL,
-  password_iterations integer NOT NULL DEFAULT 210000,
+  password_iterations integer NOT NULL DEFAULT 100000,
   is_active integer NOT NULL DEFAULT 1,
   last_login_at text,
   created_at text NOT NULL,
