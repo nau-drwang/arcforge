@@ -112,3 +112,8 @@ Do not manually edit generated `dist/` or root `functions/` unless applying an e
 ### CMS v4 admin setup
 
 `SESSION_SECRET` is recommended as a Secret in Cloudflare Pages Variables & Secrets. CMS v4 no longer blocks setup if Cloudflare variable propagation fails; it can generate a persistent internal D1 session secret and continue. Visit `/admin.html` after deployment to create the first Owner account.
+
+
+## CMS V4.1 Fix
+
+Removed the misleading SESSION_SECRET configuration notice from the admin UI. The admin flow now relies on the backend session endpoint and goes directly to Owner setup, Login, or Dashboard.

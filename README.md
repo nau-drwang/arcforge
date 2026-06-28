@@ -86,3 +86,8 @@ CMS v4 uses a backend-driven installer. The browser no longer tries to read Clou
 ## ArcForge CMS v4 Installer Release
 
 This release replaces the v3 configuration gate. Admin setup is now backend-driven: `/api/admin/session` initializes D1 tables and returns setup state. The frontend never tries to read `SESSION_SECRET`. Set `SESSION_SECRET` as a Cloudflare Secret if available; if not, CMS v4 creates a persistent internal session secret in D1.
+
+
+## CMS V4.1 Fix
+
+Removed the misleading SESSION_SECRET configuration notice from the admin UI. The admin flow now relies on the backend session endpoint and goes directly to Owner setup, Login, or Dashboard.

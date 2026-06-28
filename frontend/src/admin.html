@@ -1,20 +1,17 @@
 <!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>ArcForge CMS</title><link rel="icon" href="/favicon.svg"><link rel="stylesheet" href="/styles.css"></head><body><header class="top"><nav class="nav"><a class="brand" href="/">ArcForge CMS</a><div class="navlinks"><a class="btn" href="/">View Site</a><a class="btn" href="/zh.html">中文</a><button class="btn rust" id="logoutBtn" type="button" hidden>Logout</button></div></nav></header>
 <main class="cms-shell">
   <section class="box" id="setupPanel" hidden>
-    <h1>ArcForge CMS V4 Installer</h1><p class="notice">Create the first owner account. CMS v4 automatically creates the required D1 tables when the admin area opens, so no manual SQL migration is needed.</p>
+    <h1>ArcForge CMS V4.1 Installer</h1><p class="notice">Create the first owner account. CMS v4 automatically creates the required D1 tables when the admin area opens, so no manual SQL migration is needed.</p>
     <form id="setupForm" class="admin-form-narrow"><div class="field"><label>Username</label><input name="username" value="admin" autocomplete="username"></div><div class="field"><label>Email optional</label><input name="email" type="email"></div><div class="field"><label>Password minimum 10 characters</label><input name="password" type="password" required autocomplete="new-password"></div><div class="field"><label>Confirm password</label><input name="confirm_password" type="password" required autocomplete="new-password"></div><button class="btn primary" type="submit">Create owner account</button></form>
-    <p class="muted">CMS v4 automatically initializes D1 tables. SESSION_SECRET is recommended, but the CMS can also create a persistent internal D1 session secret if needed.</p>
+    <p class="muted">CMS automatically initializes D1 tables and uses secure admin sessions. No manual SQL migration is needed.</p>
   </section>
 
   <section class="box" id="loginPanel" hidden>
     <h1>Admin Login</h1><p class="notice">Manage artwork data, media, users, and website settings.</p>
     <form id="loginForm" class="admin-form-narrow"><div class="field"><label>Username</label><input name="username" value="admin" autocomplete="username"></div><div class="field"><label>Password</label><input name="password" type="password" required autocomplete="current-password"></div><button class="btn primary" type="submit">Login</button></form>
-    <p class="muted">CMS v4 uses D1 users, automatic database initialization, and secure HttpOnly cookies. No <code>ADMIN_USERNAME</code>, <code>ADMIN_PASSWORD</code>, or manual migration is needed.</p>
+    <p class="muted">CMS uses D1 users, automatic database initialization, and secure HttpOnly cookies. No <code>ADMIN_USERNAME</code>, <code>ADMIN_PASSWORD</code>, or manual migration is needed.</p>
   </section>
 
-  <section class="box" id="configPanel" hidden>
-    <h1>Configuration Notice</h1><p class="notice">CMS v4 can continue with an internal D1 session secret. You may still set <code>SESSION_SECRET</code> in Cloudflare for production hardening.</p>
-  </section>
 
   <section id="adminApp" hidden>
     <div class="cms-layout">
@@ -35,16 +32,16 @@
 </main>
 <script>
 const $=s=>document.querySelector(s), $$=s=>Array.from(document.querySelectorAll(s));
-const setupPanel=$('#setupPanel'), loginPanel=$('#loginPanel'), configPanel=$('#configPanel'), adminApp=$('#adminApp'), logoutBtn=$('#logoutBtn'), out=$('#output'), list=$('#productList'), form=$('#productForm'), uploadArtworkId=$('#artworkId'), mediaGrid=$('#mediaGrid'), usersList=$('#usersList');
+const setupPanel=$('#setupPanel'), loginPanel=$('#loginPanel'), adminApp=$('#adminApp'), logoutBtn=$('#logoutBtn'), out=$('#output'), list=$('#productList'), form=$('#productForm'), uploadArtworkId=$('#artworkId'), mediaGrid=$('#mediaGrid'), usersList=$('#usersList');
 let products=[], media=[], users=[], currentId='';
 function showOutput(data){ if(out) out.textContent=typeof data==='string'?data:JSON.stringify(data,null,2); }
 function mediaUrl(key){ if(!key) return '/assets/images/arcforge-hero.webp'; if(String(key).startsWith('/')) return key; return `/media/${key}`; }
 function money(cents){ return cents ? `$${(cents/100).toFixed(2)}` : 'Inquiry'; }
 async function api(url, options={}){ const r=await fetch(url, options); const d=await r.json().catch(()=>({})); if(!r.ok) throw new Error(d.error || `Request failed: ${r.status}`); return d; }
-function showOnly(panel){ [setupPanel,loginPanel,configPanel,adminApp].forEach(x=>x.hidden=true); panel.hidden=false; }
+function showOnly(panel){ [setupPanel,loginPanel,adminApp].forEach(x=>x.hidden=true); panel.hidden=false; }
 function activate(tab){ $$('.cms-tab').forEach(b=>b.classList.toggle('active',b.dataset.tab===tab)); $$('.cms-panel').forEach(p=>p.hidden=p.dataset.panel!==tab); if(tab==='media') loadMedia(); if(tab==='users') loadUsers(); }
 $$('.cms-tab').forEach(b=>b.addEventListener('click',()=>activate(b.dataset.tab)));
-async function checkSession(){ const s=await api('/api/admin/session').catch(e=>({configured:false,error:e.message})); if(!s.configured){ showOnly(configPanel); return; } if(s.setup_required){ showOnly(setupPanel); return; } if(!s.authenticated){ showOnly(loginPanel); return; } showOnly(adminApp); logoutBtn.hidden=false; await loadProducts(); await loadMedia(false); }
+async function checkSession(){ const s=await api('/api/admin/session').catch(e=>({error:e.message})); if(s.error){ showOnly(loginPanel); alert('Admin API is not ready: '+s.error); return; } if(s.setup_required){ showOnly(setupPanel); return; } if(!s.authenticated){ showOnly(loginPanel); return; } showOnly(adminApp); logoutBtn.hidden=false; await loadProducts(); await loadMedia(false); }
 function updateStats(){ $('#statArtworks').textContent=products.length; $('#statPublished').textContent=products.filter(p=>p.status==='published').length; $('#statMedia').textContent=media.length; }
 function renderList(){ const q=($('#searchBox')?.value||'').toLowerCase(); const shown=products.filter(p=>[p.title,p.title_zh,p.category,p.slug].join(' ').toLowerCase().includes(q)); list.innerHTML=shown.length?shown.map(p=>`<button class="admin-product-item ${p.id===currentId?'active':''}" type="button" data-id="${p.id}"><img src="${mediaUrl(p.cover_media_key)}" alt=""><span><strong>${p.title}</strong><small>${p.title_zh||''} · ${p.status} · ${money(p.price_cents)}</small></span></button>`).join(''):'<p class="muted">No artworks found.</p>'; }
 async function loadProducts(){ const d=await api('/api/products?admin=1'); products=d.products||[]; renderList(); if(products[0]&&!currentId) fillForm(products[0]); updateStats(); showOutput({source:d.source,count:products.length}); }

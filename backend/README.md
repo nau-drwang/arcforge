@@ -23,3 +23,8 @@ Do not use `ADMIN_USERNAME` or `ADMIN_PASSWORD` in CMS v4. Users are managed in 
 ### CMS v4 installer behavior
 
 The browser does not read Cloudflare secrets. `/api/admin/session` is backend-driven and initializes D1 tables automatically. `SESSION_SECRET` is recommended; if it is unavailable, the backend creates a persistent internal session secret in the D1 `site_settings` table so the owner setup flow is not blocked.
+
+
+## CMS V4.1 Fix
+
+Removed the misleading SESSION_SECRET configuration notice from the admin UI. The admin flow now relies on the backend session endpoint and goes directly to Owner setup, Login, or Dashboard.
