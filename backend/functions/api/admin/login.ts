@@ -2,7 +2,6 @@ import { createAdminCookie, ensureCmsSchema, json, verifyPassword } from '../aut
 interface Env { DB: D1Database; SESSION_SECRET?: string; ADMIN_SESSION_SECRET?: string; }
 export const onRequestPost: PagesFunction<Env> = async ({ request, env }) => {
   await ensureCmsSchema(env);
-  if (!(env.SESSION_SECRET || env.ADMIN_SESSION_SECRET)) return json({ error: 'SESSION_SECRET is not configured in Cloudflare Pages Variables & Secrets.' }, 500);
   const body = await request.json().catch(() => null) as { username?: string; password?: string } | null;
   if (!body?.username || !body?.password) return json({ error: 'username and password are required' }, 400);
   const user = await env.DB.prepare('SELECT * FROM admin_users WHERE username = ? AND is_active = 1').bind(body.username).first<any>().catch(() => null);

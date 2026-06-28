@@ -1,19 +1,19 @@
 <!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>ArcForge CMS</title><link rel="icon" href="/favicon.svg"><link rel="stylesheet" href="/styles.css"></head><body><header class="top"><nav class="nav"><a class="brand" href="/">ArcForge CMS</a><div class="navlinks"><a class="btn" href="/">View Site</a><a class="btn" href="/zh.html">中文</a><button class="btn rust" id="logoutBtn" type="button" hidden>Logout</button></div></nav></header>
 <main class="cms-shell">
   <section class="box" id="setupPanel" hidden>
-    <h1>ArcForge CMS Installer</h1><p class="notice">Create the first owner account. CMS v3 automatically creates the required D1 tables when the admin area opens, so no manual SQL migration is needed.</p>
+    <h1>ArcForge CMS V4 Installer</h1><p class="notice">Create the first owner account. CMS v4 automatically creates the required D1 tables when the admin area opens, so no manual SQL migration is needed.</p>
     <form id="setupForm" class="admin-form-narrow"><div class="field"><label>Username</label><input name="username" value="admin" autocomplete="username"></div><div class="field"><label>Email optional</label><input name="email" type="email"></div><div class="field"><label>Password minimum 10 characters</label><input name="password" type="password" required autocomplete="new-password"></div><div class="field"><label>Confirm password</label><input name="confirm_password" type="password" required autocomplete="new-password"></div><button class="btn primary" type="submit">Create owner account</button></form>
-    <p class="muted">Cloudflare needs only <code>SESSION_SECRET</code>. The installer creates the database tables automatically and stores the owner password in D1 as a salted hash.</p>
+    <p class="muted">CMS v4 automatically initializes D1 tables. SESSION_SECRET is recommended, but the CMS can also create a persistent internal D1 session secret if needed.</p>
   </section>
 
   <section class="box" id="loginPanel" hidden>
     <h1>Admin Login</h1><p class="notice">Manage artwork data, media, users, and website settings.</p>
     <form id="loginForm" class="admin-form-narrow"><div class="field"><label>Username</label><input name="username" value="admin" autocomplete="username"></div><div class="field"><label>Password</label><input name="password" type="password" required autocomplete="current-password"></div><button class="btn primary" type="submit">Login</button></form>
-    <p class="muted">CMS v3 uses D1 users, automatic database initialization, and secure HttpOnly cookies. No <code>ADMIN_USERNAME</code>, <code>ADMIN_PASSWORD</code>, or manual migration is needed.</p>
+    <p class="muted">CMS v4 uses D1 users, automatic database initialization, and secure HttpOnly cookies. No <code>ADMIN_USERNAME</code>, <code>ADMIN_PASSWORD</code>, or manual migration is needed.</p>
   </section>
 
   <section class="box" id="configPanel" hidden>
-    <h1>Configuration Needed</h1><p class="notice">Please set <code>SESSION_SECRET</code> in Cloudflare Pages Variables & Secrets, then redeploy. This is the only required admin secret.</p>
+    <h1>Configuration Notice</h1><p class="notice">CMS v4 can continue with an internal D1 session secret. You may still set <code>SESSION_SECRET</code> in Cloudflare for production hardening.</p>
   </section>
 
   <section id="adminApp" hidden>

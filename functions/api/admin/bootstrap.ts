@@ -1,7 +1,6 @@
-import { countUsers, createAdminCookie, hashPassword, isConfigured, json } from '../auth';
+import { countUsers, createAdminCookie, hashPassword, json } from '../auth';
 interface Env { DB: D1Database; SESSION_SECRET?: string; ADMIN_SESSION_SECRET?: string; }
 export const onRequestPost: PagesFunction<Env> = async ({ request, env }) => {
-  if (!isConfigured(env)) return json({ error: 'SESSION_SECRET is not configured in Cloudflare Pages Variables & Secrets.' }, 500);
   if (await countUsers(env) > 0) return json({ error: 'Initial admin user already exists.' }, 409);
   const body = await request.json().catch(() => null) as { username?: string; email?: string; password?: string; confirm_password?: string } | null;
   const username = (body?.username || 'admin').trim();

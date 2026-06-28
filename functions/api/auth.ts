@@ -99,12 +99,24 @@ export async function ensureCmsSchema(env: CmsEnv) {
 }
 
 
-function getSessionSecret(env: CmsEnv) {
-  return env.SESSION_SECRET || env.ADMIN_SESSION_SECRET || '';
+async function getSessionSecret(env: CmsEnv) {
+  const configured = env.SESSION_SECRET || env.ADMIN_SESSION_SECRET;
+  if (configured) return configured;
+  // CMS v4 fallback: create a persistent internal session secret in D1.
+  // This prevents the admin installer from being blocked by Cloudflare variable propagation
+  // while still avoiding a hard-coded shared secret.
+  await ensureCmsSchema(env);
+  const existing = await env.DB.prepare("SELECT value FROM site_settings WHERE key = 'cms_internal_session_secret'").first<{ value: string }>().catch(() => null);
+  if (existing?.value) return existing.value;
+  const value = `${crypto.randomUUID()}.${crypto.randomUUID()}.${crypto.randomUUID()}`;
+  const now = new Date().toISOString();
+  await env.DB.prepare('INSERT OR REPLACE INTO site_settings (key, value, updated_at) VALUES (?, ?, ?)')
+    .bind('cms_internal_session_secret', value, now).run();
+  return value;
 }
 
-export function isConfigured(env: CmsEnv) {
-  return Boolean(getSessionSecret(env));
+export function isConfigured(_env: CmsEnv) {
+  return true;
 }
 
 function getCookie(request: Request, name: string) {
@@ -159,8 +171,7 @@ export async function countUsers(env: CmsEnv) {
 }
 
 export async function createAdminCookie(env: CmsEnv, user: Pick<AdminUser, 'id' | 'username' | 'role'>) {
-  const secret = getSessionSecret(env);
-  if (!secret) throw new Error('SESSION_SECRET is not configured');
+  const secret = await getSessionSecret(env);
   const expiresAt = Date.now() + 1000 * 60 * 60 * 8;
   const payload = `${expiresAt}.${user.id}.${user.username}.${user.role}`;
   const signature = await sign(payload, secret);
@@ -170,8 +181,7 @@ export async function createAdminCookie(env: CmsEnv, user: Pick<AdminUser, 'id' 
 
 export async function getCurrentUser(request: Request, env: CmsEnv) {
   await ensureCmsSchema(env);
-  const secret = getSessionSecret(env);
-  if (!secret) return null;
+  const secret = await getSessionSecret(env);
   const cookie = getCookie(request, 'af_admin');
   const [expiresAt, userId, username, role, signature] = cookie.split('.');
   if (!expiresAt || !userId || !username || !role || !signature || Number(expiresAt) < Date.now()) return null;

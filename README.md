@@ -1,4 +1,4 @@
-# ArcForge Pages Full Stack - CMS v3
+# ArcForge Pages Full Stack - CMS v4
 
 Cloudflare Pages full-stack site with one GitHub repository and separated frontend/backend structure.
 
@@ -14,11 +14,11 @@ docs/                     Deployment and asset documentation
 dist/                     Generated frontend output for Cloudflare Pages
 ```
 
-## CMS v3
+## CMS v4
 
 Admin portal: `/admin.html`
 
-CMS v3 includes an installer-style first run:
+CMS v4 includes an installer-style first run:
 
 1. Deploy the project.
 2. Set only `SESSION_SECRET` in Cloudflare Pages Variables & Secrets.
@@ -26,7 +26,7 @@ CMS v3 includes an installer-style first run:
 4. The CMS automatically initializes the required D1 tables.
 5. Create the first owner account.
 
-No manual SQL migration is required for CMS v3.
+No manual SQL migration is required for CMS v4.
 
 Features:
 
@@ -76,3 +76,13 @@ Build output directory:
 ```text
 dist
 ```
+
+
+## ArcForge CMS v4
+
+CMS v4 uses a backend-driven installer. The browser no longer tries to read Cloudflare secrets. On first visit to `/admin.html`, the backend initializes required D1 tables and opens the owner-account setup flow. `SESSION_SECRET` is recommended as a Cloudflare Secret, but if it is missing or not propagated, CMS v4 creates a persistent internal session secret in D1 so setup is not blocked.
+
+
+## ArcForge CMS v4 Installer Release
+
+This release replaces the v3 configuration gate. Admin setup is now backend-driven: `/api/admin/session` initializes D1 tables and returns setup state. The frontend never tries to read `SESSION_SECRET`. Set `SESSION_SECRET` as a Cloudflare Secret if available; if not, CMS v4 creates a persistent internal session secret in D1.
