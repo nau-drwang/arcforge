@@ -1,8 +1,14 @@
-import { countUsers, createAdminCookie, hashPassword, json } from '../auth';
+import { canResetOwner, countUsers, createAdminCookie, hashPassword, json } from '../auth';
 interface Env { DB: D1Database; SESSION_SECRET?: string; ADMIN_SESSION_SECRET?: string; }
 export const onRequestPost: PagesFunction<Env> = async ({ request, env }) => {
-  if (await countUsers(env) > 0) return json({ error: 'Initial admin user already exists.' }, 409);
-  const body = await request.json().catch(() => null) as { username?: string; email?: string; password?: string; confirm_password?: string } | null;
+  const body = await request.json().catch(() => null) as { username?: string; email?: string; password?: string; confirm_password?: string; reset?: boolean } | null;
+  const users = await countUsers(env);
+  if (users > 0) {
+    if (!body?.reset || !(await canResetOwner(env))) {
+      return json({ error: 'Initial admin user already exists. Login or use Users after logging in.' }, 409);
+    }
+    await env.DB.prepare('DELETE FROM admin_users').run();
+  }
   const username = (body?.username || 'admin').trim();
   const password = body?.password || '';
   if (!username || username.length < 3) return json({ error: 'username must be at least 3 characters' }, 400);
@@ -15,5 +21,5 @@ export const onRequestPost: PagesFunction<Env> = async ({ request, env }) => {
     VALUES (?, ?, ?, ?, ?, ?, ?, 1, ?, ?)`).bind(id, username, body?.email || null, 'owner', hashed.hash, hashed.salt, hashed.iterations, now, now).run();
   const user = { id, username, email: body?.email || null, role: 'owner' };
   const cookie = await createAdminCookie(env, user);
-  return json({ ok: true, user }, 201, { 'set-cookie': cookie });
+  return json({ ok: true, user, reset: users > 0 }, 201, { 'set-cookie': cookie });
 };

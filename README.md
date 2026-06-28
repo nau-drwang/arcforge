@@ -1,4 +1,4 @@
-# ArcForge Pages Full Stack - CMS v4
+# ArcForge Pages Full Stack - CMS v5
 
 Cloudflare Pages full-stack site with one GitHub repository and separated frontend/backend structure.
 
@@ -14,11 +14,11 @@ docs/                     Deployment and asset documentation
 dist/                     Generated frontend output for Cloudflare Pages
 ```
 
-## CMS v4
+## CMS v5
 
 Admin portal: `/admin.html`
 
-CMS v4 includes an installer-style first run:
+CMS v5 includes an installer-style first run:
 
 1. Deploy the project.
 2. Set only `SESSION_SECRET` in Cloudflare Pages Variables & Secrets.
@@ -26,7 +26,7 @@ CMS v4 includes an installer-style first run:
 4. The CMS automatically initializes the required D1 tables.
 5. Create the first owner account.
 
-No manual SQL migration is required for CMS v4.
+No manual SQL migration is required for CMS v5.
 
 Features:
 
@@ -78,16 +78,28 @@ dist
 ```
 
 
-## ArcForge CMS v4
+## ArcForge CMS v5
 
-CMS v4 uses a backend-driven installer. The browser no longer tries to read Cloudflare secrets. On first visit to `/admin.html`, the backend initializes required D1 tables and opens the owner-account setup flow. `SESSION_SECRET` is recommended as a Cloudflare Secret, but if it is missing or not propagated, CMS v4 creates a persistent internal session secret in D1 so setup is not blocked.
-
-
-## ArcForge CMS v4 Installer Release
-
-This release replaces the v3 configuration gate. Admin setup is now backend-driven: `/api/admin/session` initializes D1 tables and returns setup state. The frontend never tries to read `SESSION_SECRET`. Set `SESSION_SECRET` as a Cloudflare Secret if available; if not, CMS v4 creates a persistent internal session secret in D1.
+CMS v5 uses a backend-driven installer. The browser no longer tries to read Cloudflare secrets. On first visit to `/admin.html`, the backend initializes required D1 tables and opens the owner-account setup flow. `SESSION_SECRET` is recommended as a Cloudflare Secret, but if it is missing or not propagated, CMS v5 creates a persistent internal session secret in D1 so setup is not blocked.
 
 
-## CMS V4.1 Fix
+## ArcForge CMS v5 Installer Release
+
+This release replaces the v3 configuration gate. Admin setup is now backend-driven: `/api/admin/session` initializes D1 tables and returns setup state. The frontend never tries to read `SESSION_SECRET`. Set `SESSION_SECRET` as a Cloudflare Secret if available; if not, CMS v5 creates a persistent internal session secret in D1.
+
+
+## CMS V5 MVP
 
 Removed the misleading SESSION_SECRET configuration notice from the admin UI. The admin flow now relies on the backend session endpoint and goes directly to Owner setup, Login, or Dashboard.
+
+
+## ArcForge CMS V5
+
+CMS V5 is the first repairable CMS MVP. It keeps the one-repository Cloudflare Pages architecture, but fixes the prior admin setup loop. The admin backend now returns a setup state from `/api/admin/session`:
+
+- `setup_required`: no admin user exists, so show Create Owner.
+- `reset_allowed`: a previous unfinished setup created an admin user but no successful login has happened yet, so the Owner account can be safely recreated.
+- `authenticated`: show Dashboard.
+- otherwise: show Login.
+
+No manual D1 migration is required. Do not set `ADMIN_USERNAME` or `ADMIN_PASSWORD`. Keep `SESSION_SECRET` as a Cloudflare Secret if it is already configured.

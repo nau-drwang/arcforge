@@ -170,6 +170,13 @@ export async function countUsers(env: CmsEnv) {
   return Number(row?.total || 0);
 }
 
+
+export async function canResetOwner(env: CmsEnv) {
+  await ensureCmsSchema(env);
+  const row = await env.DB.prepare('SELECT COUNT(*) as total FROM admin_users WHERE last_login_at IS NOT NULL').first<{ total: number }>().catch(() => ({ total: 0 }));
+  return Number(row?.total || 0) === 0;
+}
+
 export async function createAdminCookie(env: CmsEnv, user: Pick<AdminUser, 'id' | 'username' | 'role'>) {
   const secret = await getSessionSecret(env);
   const expiresAt = Date.now() + 1000 * 60 * 60 * 8;
