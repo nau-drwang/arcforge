@@ -15,12 +15,15 @@ export const onRequestPost: PagesFunction<Env> = async ({ request, env }) => {
   const body = await request.json().catch(() => null) as { username?: string; email?: string; password?: string; role?: string } | null;
   if (!body?.username || body.username.trim().length < 3) return json({ error: 'username must be at least 3 characters' }, 400);
   if (!body?.password || body.password.length < 10) return json({ error: 'password must be at least 10 characters' }, 400);
+  const username = body.username.trim();
+  const existing = await env.DB.prepare('SELECT id FROM admin_users WHERE username = ?').bind(username).first<{ id: string }>().catch(() => null);
+  if (existing?.id) return json({ error: 'Username already exists. Please choose another username.' }, 409);
   const hashed = await hashPassword(body.password);
   const id = crypto.randomUUID();
   const now = new Date().toISOString();
   await env.DB.prepare(`INSERT INTO admin_users (id, username, email, role, password_hash, password_salt, password_iterations, is_active, created_at, updated_at)
-    VALUES (?, ?, ?, ?, ?, ?, ?, 1, ?, ?)`).bind(id, body.username.trim(), body.email || null, body.role || 'editor', hashed.hash, hashed.salt, hashed.iterations, now, now).run();
-  return json({ ok: true, user: { id, username: body.username.trim(), email: body.email || null, role: body.role || 'editor', is_active: 1 } }, 201);
+    VALUES (?, ?, ?, ?, ?, ?, ?, 1, ?, ?)`).bind(id, username, body.email || null, body.role || 'editor', hashed.hash, hashed.salt, hashed.iterations, now, now).run();
+  return json({ ok: true, user: { id, username, email: body.email || null, role: body.role || 'editor', is_active: 1 } }, 201);
 };
 
 export const onRequestPut: PagesFunction<Env> = async ({ request, env }) => {
